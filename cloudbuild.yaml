@@ -1,34 +1,38 @@
 steps:
-# Build Docker image
+# Step 1: Build Docker image
 - name: 'gcr.io/cloud-builders/docker'
   args:
-    - build
-    - -t
-    - asia-south1-docker.pkg.dev/$PROJECT_ID/argocd-repo/sample-python-app:$SHORT_SHA
-    - .
+    - 'build'
+    - '-t'
+    - 'asia-south1-docker.pkg.dev/$PROJECT_ID/argocd-repo/sample-python-app:$SHORT_SHA'
+    - '.'
 
-# Push Docker image
+# Step 2: Push Docker image
 - name: 'gcr.io/cloud-builders/docker'
   args:
-    - push
-    - asia-south1-docker.pkg.dev/$PROJECT_ID/argocd-repo/sample-python-app:$SHORT_SHA
+    - 'push'
+    - 'asia-south1-docker.pkg.dev/$PROJECT_ID/argocd-repo/sample-python-app:$SHORT_SHA'
 
-# Update GitOps repository
+# Step 3: Update GitOps repository
 - name: 'gcr.io/cloud-builders/git'
-  entrypoint: bash
+  entrypoint: 'bash'
   secretEnv:
-    - GITHUB_TOKEN
+    - 'GITHUB_TOKEN'
   args:
-    - -c
+    - '-c'
     - |
+      set -e
+
       git config --global user.email "cloudbuild@google.com"
       git config --global user.name "Cloud Build"
 
-      git clone https://NISARGA-5:$GITHUB_TOKEN@github.com/NISARGA-5/sample-python-app-gitops.git
+      rm -rf sample-python-app-gitops
+
+      git clone https://NISARGA-5:${GITHUB_TOKEN}@github.com/NISARGA-5/sample-python-app-gitops.git
 
       cd sample-python-app-gitops
 
-      sed -i "s|image: .*|image: asia-south1-docker.pkg.dev/$PROJECT_ID/argocd-repo/sample-python-app:$SHORT_SHA|" deployment.yaml
+      sed -i "s|image: .*|image: asia-south1-docker.pkg.dev/$PROJECT_ID/argocd-repo/sample-python-app:$SHORT_SHA|g" deployment.yaml
 
       git add deployment.yaml
 
@@ -38,11 +42,11 @@ steps:
 
 availableSecrets:
   secretManager:
-  - versionName: projects/$PROJECT_ID/secrets/github-pat/versions/latest
-    env: GITHUB_TOKEN
+    - versionName: projects/project-1-501612/secrets/github-pat/versions/latest
+      env: GITHUB_TOKEN
 
 images:
-- asia-south1-docker.pkg.dev/$PROJECT_ID/argocd-repo/sample-python-app:$SHORT_SHA
+  - 'asia-south1-docker.pkg.dev/$PROJECT_ID/argocd-repo/sample-python-app:$SHORT_SHA'
 
 options:
   logging: CLOUD_LOGGING_ONLY
