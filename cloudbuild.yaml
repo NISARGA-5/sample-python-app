@@ -28,7 +28,7 @@ steps:
 
       rm -rf sample-python-app-gitops
 
-      git clone https://NISARGA-5:${GITHUB_TOKEN}@github.com/NISARGA-5/sample-python-app-gitops.git
+      git clone https://NISARGA-5:$$GITHUB_TOKEN@github.com/NISARGA-5/sample-python-app-gitops.git
 
       cd sample-python-app-gitops
 
